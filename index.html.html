@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математическая Викторина</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Nunito:wght@400;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #1a0a2e;
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Background Image */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('image/fon.jpg') center/cover no-repeat;
+            z-index: -2;
+        }
+
+        /* Floating Orbs */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.6;
+            z-index: -1;
+            animation: floatOrb linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        /* Particles */
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: #ff8c00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ff8c00, 0 0 20px #ff8c00;
+            z-index: -1;
+            animation: particleFloat linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+        }
+
+        /* Magic Stars */
+        .magic-star {
+            position: fixed;
+            font-size: 24px;
+            z-index: -1;
+            animation: starTwinkle 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+            50% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 20px;
+            background: linear-gradient(180deg, rgba(26,10,46,.85), transparent);
+            z-index: 100;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #ff8c00;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .icon-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #c9a0ff;
+            transition: fill 0.3s;
+        }
+
+        .icon-btn:hover svg {
+            fill: #ff8c00;
+        }
+
+        .icon-btn.active {
+            background: rgba(255,140,0,.2);
+        }
+
+        /* Game Container */
+        .game-container {
+            width: 960px;
+            max-width: 92vw;
+            height: 600px;
+            max-height: 82vh;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Main Card */
+        .main-card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(160deg, rgba(45,20,75,.93), rgba(35,15,60,.96), rgba(30,12,50,.98), rgba(40,18,65,.94));
+            border-radius: 28px;
+            border: 2px solid rgba(201,160,255,.2);
+            box-shadow: 0 0 40px rgba(155,48,255,.2), 0 0 80px rgba(255,140,0,.1), 0 16px 50px rgba(0,0,0,.6);
+            overflow: hidden;
+        }
+
+        .main-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(255,140,0,.1), transparent, rgba(155,48,255,.1), transparent);
+            animation: rotateGradient 25s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotateGradient {
+            100% { transform: rotate(360deg); }
+        }
+
+        .card-inner-border {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid rgba(201,160,255,.12);
+            border-radius: 22px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Score Display */
+        .score-display {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Amatic SC', cursive;
+            font-size: 24px;
+            color: #c9a0ff;
+            background: rgba(40,20,70,.85);
+            padding: 8px 24px;
+            border-radius: 20px;
+            z-index: 3;
+            white-space: nowrap;
+        }
+
+        /* Card Content */
+        .card-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            padding: 55px 50px 65px 50px;
+            gap: 30px;
+            height: 100%;
+        }
+
+        /* Left Panel */
+        .left-panel {
+            flex: 0 0 280px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            animation: gentleFloat 7s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(-5px) rotate(-0.5deg); }
+            50% { transform: translateY(-12px) rotate(0.5deg); }
+        }
+
+        .image-glow {
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            background: radial-gradient(circle, rgba(255,140,0,.4), transparent);
+            border-radius: 50%;
+            filter: blur(12px);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: glowPulse 5s ease-in-out infinite;
+        }
+
+        .image-glow-outer {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(155,48,255,.3), transparent);
+            border-radius: 50%;
+            filter: blur(18px);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: glowPulse 5s ease-in-out infinite reverse;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .left-panel img {
+            position: relative;
+            max-width: 210px;
+            max-height: 210px;
+            object-fit: contain;
+            opacity: 0.45;
+            transition: all 0.5s ease;
+            filter: drop-shadow(0 0 20px rgba(255,140,0,.5));
+        }
+
+        .left-panel img.bright {
+            opacity: 1;
+            filter: drop-shadow(0 0 30px rgba(255,140,0,.8)) drop-shadow(0 0 60px rgba(155,48,255,.6));
+        }
+
+        .left-panel img.dim {
+            opacity: 0.2;
+            filter: grayscale(0.6);
+        }
+
+        /* Right Panel */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .question-title {
+            font-family: 'Amatic SC', cursive;
+            font-weight: 700;
+            font-size: 26px;
+            color: #c9a0ff;
+            text-shadow: 0 0 8px rgba(201,160,255,.3);
+            margin-bottom: -8px;
+        }
+
+        .question-text {
+            font-family: 'Amatic SC', cursive;
+            font-weight: 700;
+            font-size: 52px;
+            color: #ff8c00;
+            text-shadow: 0 0 15px rgba(255,140,0,.5), 0 0 30px rgba(255,140,0,.3), 0 0 60px rgba(255,140,0,.2);
+            letter-spacing: 2px;
+            animation: equationGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes equationGlow {
+            0% { text-shadow: 0 0 15px rgba(255,140,0,.5), 0 0 30px rgba(255,140,0,.3), 0 0 60px rgba(255,140,0,.2); }
+            100% { text-shadow: 0 0 25px rgba(255,140,0,.8), 0 0 50px rgba(255,140,0,.5), 0 0 80px rgba(255,140,0,.3); }
+        }
+
+        .answers-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .answer-btn {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, rgba(55,25,90,.85), rgba(45,20,75,.9));
+            border: 2px solid rgba(201,160,255,.25);
+            border-radius: 18px;
+            font-family: 'Amatic SC', cursive;
+            font-weight: 700;
+            font-size: 28px;
+            color: #e0c8f0;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-align: left;
+        }
+
+        .answer-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: linear-gradient(180deg, #ff8c00, #9b30ff);
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .answer-btn:hover:not(.disabled) {
+            transform: translateX(8px);
+            border-color: rgba(255,140,0,.5);
+        }
+
+        .answer-btn:hover:not(.disabled)::before {
+            width: 7px;
+            opacity: 1;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, rgba(96,221,96,.9), rgba(160,255,128,.85)) !important;
+            color: #a0ff80 !important;
+            border-color: rgba(160,255,128,.6) !important;
+            opacity: 1 !important;
+            animation: correctPulse 0.6s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .answer-btn.wrong {
+            background: linear-gradient(135deg, rgba(255,64,64,.9), rgba(255,144,144,.85)) !important;
+            color: #ff9090 !important;
+            border-color: rgba(255,144,144,.6) !important;
+            opacity: 1 !important;
+            animation: wrongShake 0.5s ease;
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .answer-btn.disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Side Arrows (OUTSIDE main-card) */
+        .side-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(55,25,90,.95), rgba(40,18,65,.98));
+            border: 2px solid rgba(201,160,255,.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 20;
+        }
+
+        .side-arrow svg {
+            width: 28px;
+            height: 28px;
+            fill: #c9a0ff;
+            transition: fill 0.3s;
+        }
+
+        .side-arrow:hover svg {
+            fill: #ff8c00;
+        }
+
+        .side-arrow-left {
+            left: -28px;
+            border-radius: 16px 0 0 16px;
+        }
+
+        .side-arrow-right {
+            right: -28px;
+            border-radius: 0 16px 16px 0;
+        }
+
+        /* Pagination */
+        .pagination {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 3;
+        }
+
+        .page-dot {
+            width: 14px;
+            height: 14px;
+            background: rgba(201,160,255,.3);
+            transform: rotate(45deg);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .page-dot.active {
+            background: linear-gradient(135deg, #ff8c00, #ff6600);
+            transform: rotate(45deg) scale(1.35);
+            box-shadow: 0 0 10px rgba(255,140,0,.6);
+        }
+
+        /* Result Overlay */
+        .result-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(160deg, rgba(35,15,60,.97), rgba(25,10,45,.98));
+            border-radius: 28px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .result-overlay.show {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .result-emoji {
+            font-size: 70px;
+            animation: bounceEmoji 1s ease infinite;
+        }
+
+        @keyframes bounceEmoji {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .result-title {
+            font-family: 'Amatic SC', cursive;
+            font-size: 52px;
+            color: #ff8c00;
+            text-shadow: 0 0 20px rgba(255,140,0,.5);
+        }
+
+        .result-score {
+            font-family: 'Amatic SC', cursive;
+            font-size: 32px;
+            color: #c9a0ff;
+        }
+
+        .restart-btn {
+            font-family: 'Amatic SC', cursive;
+            font-size: 30px;
+            padding: 12px 40px;
+            background: linear-gradient(135deg, #ff8c00, #ff6600);
+            border: none;
+            border-radius: 24px;
+            color: #fff;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255,140,0,.4);
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,140,0,.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .game-container {
+                width: 95vw;
+                height: 85vh;
+            }
+
+            .card-content {
+                flex-direction: column;
+                padding: 40px 25px 50px 25px;
+            }
+
+            .left-panel {
+                flex: 0 0 auto;
+            }
+
+            .image-wrapper {
+                width: 180px;
+                height: 180px;
+            }
+
+            .image-glow {
+                width: 160px;
+                height: 160px;
+            }
+
+            .image-glow-outer {
+                width: 200px;
+                height: 200px;
+            }
+
+            .left-panel img {
+                max-width: 150px;
+                max-height: 150px;
+            }
+
+            .question-title {
+                font-size: 22px;
+            }
+
+            .question-text {
+                font-size: 36px;
+            }
+
+            .answer-btn {
+                font-size: 24px;
+                padding: 12px 20px;
+            }
+
+            .side-arrow {
+                width: 36px;
+                height: 50px;
+            }
+
+            .side-arrow-left {
+                left: -18px;
+            }
+
+            .side-arrow-right {
+                right: -18px;
+            }
+
+            .side-arrow svg {
+                width: 22px;
+                height: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div id="orbs-container"></div>
+    <div id="particles-container"></div>
+    <div id="stars-container"></div>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="icon-btn active" id="sound-btn" title="Звук">
+            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </button>
+        <button class="icon-btn" id="restart-btn" title="Начать заново">
+            <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+        <button class="icon-btn" id="fullscreen-btn" title="Полный экран">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container">
+        <!-- Стрелки вынесены ВНЕ main-card, чтобы не обрезаться overflow:hidden -->
+        <div class="side-arrow side-arrow-left" id="prev-btn">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </div>
+
+        <div class="main-card">
+            <div class="card-inner-border"></div>
+            
+            <div class="score-display">
+                Вопрос <span id="current-num">1</span> / <span id="total-num">20</span>
+            </div>
+
+            <div class="card-content">
+                <div class="left-panel">
+                    <div class="image-wrapper">
+                        <div class="image-glow"></div>
+                        <div class="image-glow-outer"></div>
+                        <!-- Добавлен onerror fallback на случай отсутствия файла image/1.png -->
+                        <img src="image/1.png" alt="Question Image" id="question-img" 
+                             onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 200 200\'><rect width=\'200\' height=\'200\' fill=\'%232d144b\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'80\'>🧮</text></svg>'">
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="question-title" id="question-title">🎃 Задание №1</div>
+                    <div class="question-text" id="question-text">3 × 4 = ?</div>
+                    <div class="answers-container" id="answers-container"></div>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+
+            <div class="result-overlay" id="result-overlay">
+                <div class="result-emoji">🎉</div>
+                <div class="result-title">Игра окончена!</div>
+                <div class="result-score">Правильных ответов: <span id="final-score">0</span> из 20</div>
+                <button class="restart-btn" id="restart-game-btn">Играть снова</button>
+            </div>
+        </div>
+
+        <div class="side-arrow side-arrow-right" id="next-btn">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </div>
+    </div>
+
+    <script>
+        // Questions Data
+        const questions = [
+            { title: "🎃 Задание №1", text: "3 × 4 = ?", answers: ["10", "12", "14", "16"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №2", text: "5 × 6 = ?", answers: ["25", "30", "35", "40"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №3", text: "7 × 8 = ?", answers: ["48", "54", "56", "63"], correct: 2, image: "image/1.png" },
+            { title: "🎃 Задание №4", text: "9 × 3 = ?", answers: ["24", "27", "30", "33"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №5", text: "4 × 7 = ?", answers: ["24", "28", "32", "36"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №6", text: "6 × 9 = ?", answers: ["45", "54", "63", "72"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №7", text: "8 × 5 = ?", answers: ["35", "40", "45", "50"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №8", text: "2 × 9 = ?", answers: ["16", "18", "20", "22"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №9", text: "7 × 6 = ?", answers: ["36", "42", "48", "54"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №10", text: "9 × 9 = ?", answers: ["72", "81", "90", "99"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №11", text: "4 × 8 = ?", answers: ["28", "32", "36", "40"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №12", text: "6 × 7 = ?", answers: ["36", "42", "48", "54"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №13", text: "3 × 9 = ?", answers: ["24", "27", "30", "33"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №14", text: "8 × 8 = ?", answers: ["56", "64", "72", "80"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №15", text: "5 × 9 = ?", answers: ["40", "45", "50", "55"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №16", text: "7 × 7 = ?", answers: ["42", "49", "56", "63"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №17", text: "4 × 6 = ?", answers: ["20", "24", "28", "32"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №18", text: "9 × 6 = ?", answers: ["48", "54", "60", "66"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №19", text: "8 × 7 = ?", answers: ["49", "56", "63", "70"], correct: 1, image: "image/1.png" },
+            { title: "🎃 Задание №20", text: "6 × 6 = ?", answers: ["30", "36", "42", "48"], correct: 1, image: "image/1.png" }
+        ];
+
+        // Game State
+        let currentQuestion = 0;
+        let score = 0;
+        let soundEnabled = true;
+        let audioContext = null;
+
+        // Initialize Audio Context (вызывается при первом взаимодействии для обхода блокировок браузера)
+        function ensureAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+
+        // Sound Effects
+        function playCorrectSound() {
+            if (!soundEnabled) return;
+            ensureAudio();
+            
+            const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+            notes.forEach((freq, index) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                }, index * 150);
+            });
+        }
+
+        function playWrongSound() {
+            if (!soundEnabled) return;
+            ensureAudio();
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 150;
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Create Background Elements
+        function createBackgroundElements() {
+            const orbColors = ['#ff8c00', '#ff6600', '#ffaa33', '#ff7700', '#9b30ff', '#7b2fbe', '#cc44ff', '#aa22ff', '#dd55ff'];
+            const orbsContainer = document.getElementById('orbs-container');
+            
+            for (let i = 0; i < 10; i++) {
+                const orb = document.createElement('div');
+                orb.className = 'glow-orb';
+                const size = Math.random() * 260 + 240;
+                orb.style.width = size + 'px';
+                orb.style.height = size + 'px';
+                orb.style.background = orbColors[Math.floor(Math.random() * orbColors.length)];
+                orb.style.left = Math.random() * 100 + '%';
+                orb.style.top = Math.random() * 100 + '%';
+                orb.style.animationDuration = (Math.random() * 13 + 12) + 's';
+                orb.style.animationDelay = Math.random() * 5 + 's';
+                orbsContainer.appendChild(orb);
+            }
+
+            const particlesContainer = document.getElementById('particles-container');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 6 + 7) + 's';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particlesContainer.appendChild(particle);
+            }
+
+            const starsContainer = document.getElementById('stars-container');
+            const starEmojis = ['⭐', '💫'];
+            for (let i = 0; i < 8; i++) {
+                const star = document.createElement('div');
+                star.className = 'magic-star';
+                star.textContent = starEmojis[Math.floor(Math.random() * starEmojis.length)];
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Render Question
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            
+            document.getElementById('current-num').textContent = currentQuestion + 1;
+            document.getElementById('total-num').textContent = questions.length;
+            document.getElementById('question-title').textContent = q.title;
+            document.getElementById('question-text').textContent = q.text;
+            
+            const img = document.getElementById('question-img');
+            img.src = q.image;
+            img.classList.remove('bright', 'dim');
+            
+            const answersContainer = document.getElementById('answers-container');
+            answersContainer.innerHTML = '';
+            
+            q.answers.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.onclick = () => checkAnswer(index);
+                answersContainer.appendChild(btn);
+            });
+            
+            renderPagination();
+        }
+
+        // Render Pagination
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            questions.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'page-dot' + (index === currentQuestion ? ' active' : '');
+                dot.onclick = () => {
+                    currentQuestion = index;
+                    renderQuestion();
+                };
+                pagination.appendChild(dot);
+            });
+        }
+
+        // Check Answer
+        function checkAnswer(selectedIndex) {
+            ensureAudio(); // Гарантируем инициализацию звука при клике
+            const q = questions[currentQuestion];
+            const buttons = document.querySelectorAll('.answer-btn');
+            
+            // Блокируем все кнопки
+            buttons.forEach(btn => btn.classList.add('disabled'));
+            
+            if (selectedIndex === q.correct) {
+                buttons[selectedIndex].classList.add('correct');
+                document.getElementById('question-img').classList.add('bright');
+                score++;
+                playCorrectSound();
+            } else {
+                buttons[selectedIndex].classList.add('wrong');
+                buttons[q.correct].classList.add('correct');
+                document.getElementById('question-img').classList.add('dim');
+                playWrongSound();
+            }
+            
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    currentQuestion++;
+                    renderQuestion();
+                } else {
+                    showResults();
+                }
+            }, 1500);
+        }
+
+        // Show Results
+        function showResults() {
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('result-overlay').classList.add('show');
+        }
+
+        // Restart Game
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('result-overlay').classList.remove('show');
+            renderQuestion();
+        }
+
+        // Navigation
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('sound-btn').addEventListener('click', function() {
+            ensureAudio();
+            soundEnabled = !soundEnabled;
+            this.classList.toggle('active');
+            this.innerHTML = soundEnabled 
+                ? '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>'
+                : '<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>';
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', restartGame);
+        document.getElementById('restart-game-btn').addEventListener('click', restartGame);
+
+        document.getElementById('prev-btn').addEventListener('click', prevQuestion);
+        document.getElementById('next-btn').addEventListener('click', nextQuestion);
+
+        document.getElementById('fullscreen-btn').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Keyboard Controls
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('result-overlay').classList.contains('show')) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    restartGame();
+                }
+                return;
+            }
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    prevQuestion();
+                    break;
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    nextQuestion();
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    const index = parseInt(e.key) - 1;
+                    const buttons = document.querySelectorAll('.answer-btn');
+                    if (buttons[index] && !buttons[index].classList.contains('disabled')) {
+                        checkAnswer(index);
+                    }
+                    break;
+            }
+        });
+
+        // Initialize
+        createBackgroundElements();
+        renderQuestion();
+    </script>
+</body>
+</html>
